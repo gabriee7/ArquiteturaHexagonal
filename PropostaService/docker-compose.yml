@@ -1,0 +1,44 @@
+services:
+  db:
+    image: postgres:16
+    container_name: proposta-db
+    restart: always
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=proposta_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_proposta:/var/lib/postgresql/data
+    networks:
+      - proposta-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d proposta_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: src/PropostaService.API/Dockerfile
+    container_name: proposta-api
+    restart: on-failure
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=proposta_db;Username=admin;Password=admin;
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "5000:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - proposta-net
+
+volumes:
+  postgres_data_proposta:
+
+networks:
+  proposta-net:
+    driver: bridge

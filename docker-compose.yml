@@ -1,0 +1,3 @@
+
+include:
+  - PropostaService/docker-compose.yml
