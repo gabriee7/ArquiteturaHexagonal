@@ -1,13 +1,46 @@
+using Microsoft.EntityFrameworkCore;
+using PropostaService.API.Middlewares;
+using PropostaService.Application.Propostas.Interfaces;
+using PropostaService.Application.Propostas.UseCases;
+using PropostaService.Domain.Ports.Repositories;
+using PropostaService.Infrastructure.Adapters.Persistence;
+using PropostaService.Infrastructure.Data;
+using System.Text.Json.Serialization;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(connectionString));
+
+builder.Services.AddScoped<ICriarPropostaUseCase, CriarPropostaUseCase>();
+builder.Services.AddScoped<IBuscarPropostaPorIdUseCase, BuscarPropostaPorIdUseCase>();
+builder.Services.AddScoped<IBuscarTodasPropostasUseCase, BuscarTodasPropostasUseCase>();
+builder.Services.AddScoped<IAtualizarPropostaUseCase, AtualizarPropostaUseCase>();
+builder.Services.AddScoped<IDeletarPropostaUseCase, DeletarPropostaUseCase>();
+builder.Services.AddScoped<IAprovarPropostaUseCase, AprovarPropostaUseCase>();
+builder.Services.AddScoped<IRejeitarPropostaUseCase, RejeitarPropostaUseCase>();
+builder.Services.AddScoped<IPropostaRepository, PropostaRepository>();
+
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
+
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+builder.Services.AddControllers();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+app.UseExceptionHandler();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -16,29 +49,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+app.UseAuthorization();
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi();
+app.MapControllers();
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
