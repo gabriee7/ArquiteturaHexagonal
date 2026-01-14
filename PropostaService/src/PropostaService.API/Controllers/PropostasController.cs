@@ -37,7 +37,6 @@ namespace PropostaService.API.Controllers
 
         [HttpPost]
         [ProducesResponseType(typeof(PropostaOutput), StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Criar([FromBody] CriarPropostaInput input)
         {
             var output = await _criarUseCase.ExecutarAsync(input);
@@ -49,7 +48,6 @@ namespace PropostaService.API.Controllers
 
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(PropostaOutput), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> ObterPorId(Guid id)
         {
             var output = await _obterUseCase.ExecutarAsync(id);
@@ -67,7 +65,6 @@ namespace PropostaService.API.Controllers
 
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(PropostaOutput), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Atualizar(Guid id, [FromBody] AtualizarPropostaInput input)
         {
             if (id != input.Id) return BadRequest("O ID da URL difere do corpo.");
@@ -78,7 +75,6 @@ namespace PropostaService.API.Controllers
 
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Deletar(Guid id)
         {
             await _deletarUseCase.ExecutarAsync(id);
@@ -88,8 +84,6 @@ namespace PropostaService.API.Controllers
 
         [HttpPost("{id}/aprovar")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Aprovar(Guid id)
         {
             await _aprovarUseCase.ExecutarAsync(id);
@@ -98,8 +92,6 @@ namespace PropostaService.API.Controllers
 
         [HttpPost("{id}/rejeitar")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Rejeitar(Guid id, [FromBody] RejeitarPropostaInput input)
         {
             await _rejeitarUseCase.ExecutarAsync(id, input);
