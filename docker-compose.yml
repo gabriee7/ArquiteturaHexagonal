@@ -1,3 +1,4 @@
 
 include:
   - PropostaService/docker-compose.yml
+  - ContratacaoService/docker-compose.yml

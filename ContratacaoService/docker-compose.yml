@@ -1,0 +1,46 @@
+services:
+  contratacao-db:
+    image: postgres:16
+    container_name: contratacao-db
+    restart: always
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=contratacao_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data_contratacao:/var/lib/postgresql/data
+    networks:
+      - shared-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d contratacao_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  contratacao-api:
+    build:
+      context: .
+      dockerfile: src/ContratacaoService.API/Dockerfile
+    container_name: contratacao-api
+    restart: on-failure
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=contratacao-db;Port=5432;Database=contratacao_db;Username=admin;Password=admin;
+      - Services__PropostaApiBaseUrl=http://localhost:12044/ 
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "5001:8080"
+    depends_on:
+      contratacao-db:
+        condition: service_healthy
+    networks:
+      - shared-net
+
+volumes:
+  postgres_data_contratacao:
+
+networks:
+  shared-net:
+    name: seguradora-network
+    driver: bridge

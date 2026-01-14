@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Asp.Versioning;
+using Microsoft.AspNetCore.Mvc;
 using PropostaService.Application.Common.DTOs;
 using PropostaService.Application.Propostas.DTOs.In;
 using PropostaService.Application.Propostas.DTOs.Out;
@@ -7,7 +8,8 @@ using PropostaService.Application.Propostas.Interfaces;
 namespace PropostaService.API.Controllers
 {
     [ApiController]
-    [Route("api/propostas")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     public class PropostasController : ControllerBase
     {
         private readonly ICriarPropostaUseCase _criarUseCase;
@@ -39,11 +41,27 @@ namespace PropostaService.API.Controllers
         [ProducesResponseType(typeof(PropostaOutput), StatusCodes.Status201Created)]
         public async Task<IActionResult> Criar([FromBody] CriarPropostaInput input)
         {
-            var output = await _criarUseCase.ExecutarAsync(input);
-            return CreatedAtAction(
-                nameof(ObterPorId), 
-                new { id = output.Id }, 
-                output);
+          var output = await _criarUseCase.ExecutarAsync(input);
+          return CreatedAtAction(
+              nameof(ObterPorId),
+              new { id = output.Id },
+              output);
+        }
+
+        [HttpPost("{id}/aprovar")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> Aprovar(Guid id)
+        {
+            await _aprovarUseCase.ExecutarAsync(id);
+            return NoContent();
+        }
+
+        [HttpPost("{id}/rejeitar")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> Rejeitar(Guid id, [FromBody] RejeitarPropostaInput input)
+        {
+            await _rejeitarUseCase.ExecutarAsync(id, input);
+            return NoContent();
         }
 
         [HttpGet("{id}")]
@@ -79,22 +97,6 @@ namespace PropostaService.API.Controllers
         {
             await _deletarUseCase.ExecutarAsync(id);
 
-            return NoContent();
-        }
-
-        [HttpPost("{id}/aprovar")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        public async Task<IActionResult> Aprovar(Guid id)
-        {
-            await _aprovarUseCase.ExecutarAsync(id);
-            return NoContent();
-        }
-
-        [HttpPost("{id}/rejeitar")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        public async Task<IActionResult> Rejeitar(Guid id, [FromBody] RejeitarPropostaInput input)
-        {
-            await _rejeitarUseCase.ExecutarAsync(id, input);
             return NoContent();
         }
     }

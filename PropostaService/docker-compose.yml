@@ -1,5 +1,5 @@
 services:
-  db:
+  proposta-db:
     image: postgres:16
     container_name: proposta-db
     restart: always
@@ -12,14 +12,14 @@ services:
     volumes:
       - postgres_data_proposta:/var/lib/postgresql/data
     networks:
-      - proposta-net
+      - shared-net
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U admin -d proposta_db"]
       interval: 5s
       timeout: 5s
       retries: 5
 
-  api:
+  proposta-api:
     build:
       context: .
       dockerfile: src/PropostaService.API/Dockerfile
@@ -31,14 +31,15 @@ services:
     ports:
       - "5000:8080"
     depends_on:
-      db:
+      proposta-db:
         condition: service_healthy
     networks:
-      - proposta-net
+      - shared-net
 
 volumes:
   postgres_data_proposta:
 
 networks:
-  proposta-net:
+  shared-net:
+    name: seguradora-network
     driver: bridge
