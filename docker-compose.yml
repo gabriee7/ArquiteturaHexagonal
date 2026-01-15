@@ -2,3 +2,22 @@
 include:
   - PropostaService/docker-compose.yml
   - ContratacaoService/docker-compose.yml
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: seguradora-rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=admin
+    networks:
+      - shared-net
+
+networks:
+  shared-net:
+    name: seguradora-network
+    driver: bridge

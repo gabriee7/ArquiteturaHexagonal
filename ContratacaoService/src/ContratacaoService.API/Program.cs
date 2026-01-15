@@ -5,11 +5,13 @@ using ContratacaoService.Application.Contratacoes.UseCases;
 using ContratacaoService.Domain.Ports.External.PropostaService;
 using ContratacaoService.Domain.Ports.Repositories;
 using ContratacaoService.Infrastructure.Adapters.External;
+using ContratacaoService.Infrastructure.Adapters.Messaging;
 using ContratacaoService.Infrastructure.Adapters.Persistence;
 using ContratacaoService.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using System.Text.Json.Serialization;
+using ContratacaoService.Infrastructure.Adapters.Messaging.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -59,6 +61,11 @@ builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo { Title = "Contratacao API", Version = "v1" });
 });
+
+builder.Services.AddMassTransitWithAutoDiscovery(
+    builder.Configuration,
+    typeof(PropostaAprovadaConsumer).Assembly
+);
 
 var app = builder.Build();
 

@@ -4,7 +4,10 @@ using Microsoft.OpenApi.Models;
 using PropostaService.API.Middlewares;
 using PropostaService.Application.Propostas.Interfaces;
 using PropostaService.Application.Propostas.UseCases;
+using PropostaService.Domain.Ports.Messaging;
 using PropostaService.Domain.Ports.Repositories;
+using PropostaService.Infrastructure.Adapters.Messaging;
+using PropostaService.Infrastructure.Adapters.Messaging.Config;
 using PropostaService.Infrastructure.Adapters.Persistence;
 using PropostaService.Infrastructure.Data;
 using System.Text.Json.Serialization;
@@ -27,25 +30,25 @@ builder.Services.AddScoped<IRejeitarPropostaUseCase, RejeitarPropostaUseCase>();
 builder.Services.AddControllers()
   .AddJsonOptions(options =>
   {
-    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+      options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
   });
 
 var apiVersioningBuilder = builder.Services.AddApiVersioning(options =>
 {
-  options.DefaultApiVersion = new ApiVersion(1, 0);
-  options.AssumeDefaultVersionWhenUnspecified = true;
-  options.ReportApiVersions = true;
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ReportApiVersions = true;
 });
 
 apiVersioningBuilder.AddApiExplorer(options =>
 {
-  options.GroupNameFormat = "'v'VVV";
-  options.SubstituteApiVersionInUrl = true;
+    options.GroupNameFormat = "'v'VVV";
+    options.SubstituteApiVersionInUrl = true;
 });
 
 builder.Services.Configure<RouteOptions>(options =>
 {
-  options.LowercaseUrls = true;
+    options.LowercaseUrls = true;
 });
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
@@ -55,36 +58,39 @@ builder.Services.AddProblemDetails();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-  options.SwaggerDoc("v1", new OpenApiInfo { Title = "Proposta API", Version = "v1" });
+    options.SwaggerDoc("v1", new OpenApiInfo { Title = "Proposta API", Version = "v1" });
 });
+
+builder.Services.AddMassTransitProducer(builder.Configuration);
+builder.Services.AddScoped<IMessageBus, MassTransitPublisherAdapter>();
 
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-  var services = scope.ServiceProvider;
-  try
-  {
-    var context = services.GetRequiredService<AppDbContext>();
-    if (context.Database.GetPendingMigrations().Any())
-      context.Database.Migrate();
-  }
-  catch (Exception ex)
-  {
-    var logger = services.GetRequiredService<ILogger<Program>>();
-    logger.LogError(ex, "Ocorreu um erro ao rodar as migrations.");
-  }
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<AppDbContext>();
+        if (context.Database.GetPendingMigrations().Any())
+            context.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Ocorreu um erro ao rodar as migrations.");
+    }
 }
 
 app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {
-  app.UseSwagger();
-  app.UseSwaggerUI(options =>
-  {
-    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Proposta API v1");
-  });
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "Proposta API v1");
+    });
 }
 
 app.UseAuthorization();
