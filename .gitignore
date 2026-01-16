@@ -491,3 +491,7 @@ mysql_data/
 mongo_data/
 proposta_db_data/
 *.log
+
+# Logs txt
+ContratacaoService/contratacao-logs/
+PropostaService/proposta-logs/
