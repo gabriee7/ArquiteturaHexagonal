@@ -13,6 +13,8 @@ O ecossistema opera sob o seguinte fluxo de integração técnica:
 5.  **Consumo**: O `ContratacaoService` consome o evento, valida a integridade da proposta via integração com API REST e persiste a nova contratação.
 6.  **Resultado**: A contratação é efetivada e disponibilizada para consulta via endpoint `GET /api/v1/contratacoes/{id}` ou `GET /api/v1/contratacoes/proposta/{propostaId}`.
 
+### Arquitetura do Sistema (Hexagonal e Integração)
+![Diagrama de Arquitetura Hexagonal e Integração](./docs/arquitetura.png)
 
 ## Pré-requisitos
 
