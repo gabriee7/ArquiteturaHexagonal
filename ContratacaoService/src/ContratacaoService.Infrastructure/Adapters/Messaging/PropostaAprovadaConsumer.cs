@@ -6,7 +6,7 @@ using MassTransit;
 
 namespace ContratacaoService.Infrastructure.Adapters.Messaging
 {
-    [ConsumerConfiguration("contratacao-proposta-aprovada")]
+    [ConsumerConfiguration("RabbitMq:QueueNamePropostaAprovada")]
     public class PropostaAprovadaConsumer : IConsumer<PropostaAprovadaEvent>
     {
         private readonly ICriarContratacaoUseCase _useCase;

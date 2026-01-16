@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace ContratacaoService.Infrastructure.Adapters.Messaging.Events
+﻿namespace ContratacaoService.Infrastructure.Adapters.Messaging.Events
 {
     public class PropostaAprovadaEvent
     {

@@ -2,12 +2,7 @@
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ContratacaoService.Infrastructure.Adapters.Messaging.Extensions
 {
@@ -33,7 +28,7 @@ namespace ContratacaoService.Infrastructure.Adapters.Messaging.Extensions
                     });
 
                     cfg.UseRawJsonSerializer(RawSerializerOptions.AnyMessageType);
-                    ConfigureConsumersFromAssemblies(context, cfg, consumerAssemblies);
+                    ConfigureConsumersFromAssemblies(context, cfg, consumerAssemblies, configuration);
                 });
             });
         }
@@ -41,15 +36,12 @@ namespace ContratacaoService.Infrastructure.Adapters.Messaging.Extensions
         private static void ConfigureConsumersFromAssemblies(
             IBusRegistrationContext context,
             IRabbitMqBusFactoryConfigurator cfg,
-            Assembly[] assemblies)
+            Assembly[] assemblies,
+            IConfiguration configuration)
         {
-            var consumerTypes = assemblies
+            var consumersByQueue = assemblies
                 .SelectMany(a => a.GetTypes())
-                .Where(t => t.GetInterfaces()
-                    .Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IConsumer<>)))
-                .ToList();
-
-            var consumersByQueue = consumerTypes
+                .Where(t => t.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IConsumer<>)))
                 .Select(type => new
                 {
                     Type = type,
@@ -57,17 +49,13 @@ namespace ContratacaoService.Infrastructure.Adapters.Messaging.Extensions
                 })
                 .Where(x => x.Metadata != null)
                 .GroupBy(x => x.Metadata!.QueueName);
-
             foreach (var queueGroup in consumersByQueue)
             {
-                var queueName = queueGroup.Key;
-                var consumers = queueGroup.ToList();
-
+                var queueName = configuration[queueGroup.Key] ?? queueGroup.Key;
                 cfg.ReceiveEndpoint(queueName, e =>
                 {
                     e.ConfigureConsumeTopology = false;
-
-                    foreach (var consumer in consumers)
+                    foreach (var consumer in queueGroup)
                     {
                         ConfigureConsumer(context, e, consumer.Type);
                     }
