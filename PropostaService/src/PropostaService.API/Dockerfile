@@ -19,7 +19,7 @@ COPY --from=build /app/out .
 EXPOSE 8080
 
 USER root
-RUN mkdir -p /app/Logs && chown -R $USER /app/Logs
-USER $USER
+RUN mkdir -p /app/Logs && chown -R app:app /app/Logs
+USER app
 
 ENTRYPOINT ["dotnet", "PropostaService.API.dll"]
