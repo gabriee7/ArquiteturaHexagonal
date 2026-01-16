@@ -4,6 +4,26 @@ include:
   - ContratacaoService/docker-compose.yml
 
 services:
+  postgres:
+    image: postgres:16
+    container_name: seguradora-postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - shared-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   rabbitmq:
     image: rabbitmq:3-management
     container_name: seguradora-rabbitmq
@@ -16,6 +36,15 @@ services:
       - RABBITMQ_DEFAULT_PASS=admin
     networks:
       - shared-net
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+    name: seguradora-postgres-data
 
 networks:
   shared-net:

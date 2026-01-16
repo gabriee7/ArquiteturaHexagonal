@@ -20,4 +20,8 @@ COPY --from=build /app/out .
 ENV ASPNETCORE_URLS=http://+:8080
 EXPOSE 8080
 
+USER root
+RUN mkdir -p /app/Logs && chown -R $USER /app/Logs
+USER $USER
+
 ENTRYPOINT ["dotnet", "ContratacaoService.API.dll"]
