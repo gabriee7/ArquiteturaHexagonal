@@ -66,7 +66,7 @@ builder.Services.AddProblemDetails();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc("v1", new OpenApiInfo { Title = "Contratacao API", Version = "v1" });
+    options.SwaggerDoc("v1", new OpenApiInfo { Title = "Contratacao Microservice API", Version = "v1" });
 });
 
 builder.Services.AddMassTransitWithAutoDiscovery(
@@ -107,3 +107,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+public partial class Program { }

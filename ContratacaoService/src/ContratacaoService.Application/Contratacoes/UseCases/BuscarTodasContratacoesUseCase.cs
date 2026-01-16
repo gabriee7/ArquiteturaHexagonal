@@ -2,8 +2,6 @@
 using ContratacaoService.Application.Common.DTOs;
 using ContratacaoService.Application.Contratacoes.DTOs.Out;
 using ContratacaoService.Application.Contratacoes.Interfaces;
-using ContratacaoService.Domain.Entities;
-using ContratacaoService.Domain.Exceptions;
 using ContratacaoService.Domain.Ports.Repositories;
 
 namespace ContratacaoService.Application.Contratacoes.UseCases

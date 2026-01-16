@@ -7,6 +7,8 @@
         public int TotalPaginas { get; set; }
         public int TotalItens { get; set; }
 
+        public ListaPaginadaOutput() { }
+
         public ListaPaginadaOutput(List<T> itens, int count, int paginaAtual, int tamanhoPagina)
         {
             Itens = itens;
