@@ -17,4 +17,9 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 COPY --from=build /app/out .
 EXPOSE 8080
+
+USER root
+RUN mkdir -p /app/Logs && chown -R $USER /app/Logs
+USER $USER
+
 ENTRYPOINT ["dotnet", "PropostaService.API.dll"]

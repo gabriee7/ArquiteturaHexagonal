@@ -10,9 +10,16 @@ using PropostaService.Infrastructure.Adapters.Messaging;
 using PropostaService.Infrastructure.Adapters.Messaging.Config;
 using PropostaService.Infrastructure.Adapters.Persistence;
 using PropostaService.Infrastructure.Data;
+using Serilog;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
+
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .CreateLogger();
+builder.Host.UseSerilog();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>
